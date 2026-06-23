@@ -95,7 +95,6 @@ echo "==> relay port: $RELAY_PORT"
 
 "$WORK/deaddrop-relay" \
   --listen ":${RELAY_PORT}" \
-  --max-blob-bytes 11000000 \
   --local-only \
   >"$WORK/relay.log" 2>&1 &
 RELAY_PID=$!

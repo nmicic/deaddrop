@@ -26,8 +26,9 @@ import (
 const (
 	// maxBlobBytes caps the plaintext file size client-side before
 	// any crypto work runs. The wire body grows by version(1) +
-	// nonce(24) + tag(16) = 41 bytes — well within the relay's own
-	// cap so the client-side check is a fast-fail UX improvement.
+	// outer nonce(24) + outer tag(16), and by another nonce+tag when
+	// the E2E content layer is active. The relay's default body cap
+	// includes that currently-shipped max overhead.
 	maxBlobBytes = 10 * 1024 * 1024 // 10 MiB (D-46)
 
 	sendHTTPTimeout = 30 * time.Second

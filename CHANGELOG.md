@@ -5,7 +5,12 @@
 
 ## Unreleased
 
-(no entries)
+### Fixed
+
+- Relay HTTP server now sets read-header, read, write, and idle timeouts
+  for direct internet-facing deployments.
+- Default relay body cap now admits the documented 10 MiB plaintext file
+  limit plus the currently-shipped max wire overhead.
 
 ---
 

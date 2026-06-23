@@ -155,7 +155,8 @@ not the durability layer.
 **Memory / back-pressure constraints.** Two caps apply:
 
 1. **Per-request RSS cap.** The ciphertext copy in step 3 is
-   `MAX_BLOB_BYTES`-bounded (10 MiB default). The relay caps
+   `MAX_BLOB_BYTES`-bounded (10 MiB plaintext plus wire overhead by default).
+   The relay caps
    concurrent in-flight GETs so that
    `MAX_BLOB_BYTES × max_concurrent` fits in RSS with head-room for
    caddy, the Go runtime, and the resident slot store. A
@@ -232,8 +233,8 @@ semaphore, so 503 here is NOT an oracle visible to probes.
 ## 4. Operational parameters (defaults)
 
 ```
-MAX_BLOB_BYTES    = 10_485_760     (10 MiB, per-slot cap)
-MAX_STORE_BYTES   = 5_368_709_120  (≈ 5 GiB total resident; D-39)
+MAX_BLOB_BYTES    = 10_485_841     (10 MiB plaintext + max wire overhead)
+MAX_STORE_BYTES   = 5_368_750_592  (≈ 5 GiB total resident; D-39)
 MAX_TTL_SECONDS   = 3600           (1 hour)
 MAX_READS         = 10
 DEFAULT_READS     = 1
@@ -242,7 +243,7 @@ WRITE_TOKEN       = REQUIRED       (internet-facing; --local-only opt-out)
 
 `MAX_STORE_BYTES` MUST be sized beneath the systemd unit's
 `MemoryMax=` with head-room for the Go runtime, caddy, and the
-per-request copy path (§3.2). Bumping `MAX_BLOB_BYTES` above 10 MiB
+per-request copy path (§3.2). Bumping the plaintext cap above 10 MiB
 is operator-allowed; pair it with a `MemoryMax=` / `MAX_STORE_BYTES`
 audit, NOT a disk-quota audit (there is no disk store — D-39).
 
@@ -323,7 +324,7 @@ called out inline.
 For a two-laptop personal deployment:
 
 ```
-MAX_BLOB_BYTES    = 10_485_760
+MAX_BLOB_BYTES    = 10_485_841
 MAX_TTL_SECONDS   = 600            (10 min)
 MAX_READS         = 1              (strict one-shot; no distribution use case)
 WRITE_TOKEN       = enabled

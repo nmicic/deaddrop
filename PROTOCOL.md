@@ -307,7 +307,7 @@ Set on the relay:
 ```
 DEPLOY_SECRET       32+ raw bytes, stored with a "hex:" or "b64:" prefix (see note below)
 WRITE_TOKEN         32+ raw bytes, stored with a "hex:" or "b64:" prefix (see note below)
-MAX_BLOB_BYTES      10485760 (10 MiB), operator-tunable
+MAX_BLOB_BYTES      10485841 (10 MiB plaintext + max wire overhead), operator-tunable
 MAX_TTL_SECONDS     3600
 MAX_READS           10
 ```

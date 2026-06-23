@@ -27,8 +27,6 @@ services:
     command:
       - "--listen"
       - "unix:/run/deaddrop/app.sock"
-      - "--max-blob-bytes"
-      - "11000000"
     read_only: true
     cap_drop: [ALL]
     cap_add: [IPC_LOCK]

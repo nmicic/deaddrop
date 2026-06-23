@@ -173,7 +173,7 @@ aead_ct, tag = XChaCha20-Poly1305.Seal(
 ```
 
 Total body length: `1 + 24 + 32 + 16 = 73 bytes`. Fits trivially
-within `MAX_BLOB_BYTES` (10 MiB default).
+within `MAX_BLOB_BYTES`.
 
 **Why direction binds the AD even though `leg_key` already differs
 per direction.** §2.2 derives `leg_key = HKDF(..., info =

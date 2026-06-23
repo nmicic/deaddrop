@@ -10,13 +10,16 @@ import (
 	"time"
 
 	"github.com/nmicic/deaddrop/internal/clock"
+	"github.com/nmicic/deaddrop/internal/wire"
 )
 
 // Defaults exported for the handler and the CLI to share one source of
 // truth. These mirror PROTOCOL.md §8 operational parameters.
 const (
-	DefaultMaxBlobBytes  = 10_485_760 // 10 MiB
-	DefaultMaxTTLSeconds = 3600       // 1 hour
+	DefaultMaxPlaintextBytes = 10_485_760 // 10 MiB user file cap
+	DefaultMaxBlobBytes      = DefaultMaxPlaintextBytes + wire.PlainBodyE2EOverhead
+
+	DefaultMaxTTLSeconds = 3600 // 1 hour
 	DefaultMaxReads      = 10
 	DefaultReads         = 1
 )

@@ -149,7 +149,8 @@ provide; listed so operators size their threat model correctly.
     exit. SIGKILL / SIGSEGV / OOM-kill cannot zeroize; mitigation is
     mlockall + swap-disabled + no-core-dump (D-39).
 [X] Enforces MAX_TTL (1 hour).
-[X] Enforces MAX_BLOB_BYTES (10 MiB default, operator-tunable).
+[X] Enforces MAX_BLOB_BYTES (10 MiB plaintext plus wire overhead by
+    default, operator-tunable).
 [X] Enforces MAX_STORE_BYTES (5 GiB default); POST exceeding the cap
     returns 503, surfaced to clients as EDDRelayOverloaded (D-38).
 [X] Returns 404 with empty body for non-existent / expired /

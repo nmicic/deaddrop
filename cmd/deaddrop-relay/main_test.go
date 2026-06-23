@@ -42,6 +42,18 @@ func noopListen(called *bool) serverRunFn {
 	}
 }
 
+func captureListen(called *bool, captured **http.Server) serverRunFn {
+	return func(srv *http.Server, _ net.Listener) error {
+		if called != nil {
+			*called = true
+		}
+		if captured != nil {
+			*captured = srv
+		}
+		return nil
+	}
+}
+
 // TestMainFlags_MissingDeploySecret — run() must refuse to start
 // without --deploy-secret. Validation fires before any lifecycle
 // syscall (mlockall / PR_SET_DUMPABLE) or listen call, so the test
@@ -98,6 +110,39 @@ func TestRelay_DeploySecretFd(t *testing.T) {
 	}
 	if strings.Contains(stderr.String(), "deprecated") {
 		t.Fatalf("stderr unexpectedly mentions \"deprecated\" with fd-only invocation: %s", stderr.String())
+	}
+}
+
+func TestRelay_HTTPServerTimeouts(t *testing.T) {
+	t.Setenv(envDeploySecret, testDeploySecret)
+	t.Setenv(envDeploySecretLegacy, "")
+	t.Setenv(envWriteToken, testWriteToken)
+	t.Setenv(envWriteTokenLegacy, "")
+
+	var stderr bytes.Buffer
+	var listenCalled bool
+	var srv *http.Server
+	err := run([]string{
+		"--listen", "127.0.0.1:0",
+		"--local-only",
+	}, &stderr, captureListen(&listenCalled, &srv), nil)
+	if err != nil {
+		t.Fatalf("run() = %v; want nil", err)
+	}
+	if !listenCalled || srv == nil {
+		t.Fatalf("listen was not invoked with a server")
+	}
+	if srv.ReadHeaderTimeout != defaultReadHeaderTimeout {
+		t.Fatalf("ReadHeaderTimeout = %s, want %s", srv.ReadHeaderTimeout, defaultReadHeaderTimeout)
+	}
+	if srv.ReadTimeout != defaultReadTimeout {
+		t.Fatalf("ReadTimeout = %s, want %s", srv.ReadTimeout, defaultReadTimeout)
+	}
+	if srv.WriteTimeout != defaultWriteTimeout {
+		t.Fatalf("WriteTimeout = %s, want %s", srv.WriteTimeout, defaultWriteTimeout)
+	}
+	if srv.IdleTimeout != defaultIdleTimeout {
+		t.Fatalf("IdleTimeout = %s, want %s", srv.IdleTimeout, defaultIdleTimeout)
 	}
 }
 

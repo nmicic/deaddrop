@@ -171,8 +171,9 @@ Monocypher (bring-your-own crypto is overkill without an embedded target).
 
 ## D-09  Default max blob 1 MiB
 
-**Superseded by D-24 and D-33.** The shipped default is
-`MAX_BLOB_BYTES = 10485760` (10 MiB) on the sole VM/Go backend. The
+**Superseded by D-24, D-33, and D-74.** The shipped default is
+`MAX_BLOB_BYTES = 10485841` (10 MiB plaintext + wire overhead; see
+D-74) on the sole VM/Go backend. The
 1 MiB figure below was specific to the parked Cloudflare profile and
 is no longer in effect. The Cloudflare-KV rationale is moot per D-33.
 
@@ -2758,3 +2759,57 @@ Rationale:
   false in the most important place.
 - Detection-then-error path keeps migration cost to a one-line edit on
   the operator's side.
+
+---
+
+## D-73  Relay HTTP server has explicit direct-exposure timeouts
+
+Decision: `deaddrop-relay` sets non-zero `http.Server` timeouts:
+
+- `ReadHeaderTimeout = 5s`
+- `ReadTimeout = 30s`
+- `WriteTimeout = 30s`
+- `IdleTimeout = 60s`
+
+Rationale: the recommended production path puts the relay behind Caddy,
+but the binary can also listen on a TCP socket directly. The direct path
+must not rely on Go's zero-value no-timeout behavior. `ReadHeaderTimeout`
+closes the classic slow-header resource pin; the full read/write
+timeouts align with the reference client's 30s send/recv timeout (D-49)
+for the 10 MiB default file cap; `IdleTimeout` bounds keep-alive
+connection retention.
+
+No flags are added. Operators needing unusual slow-link behavior can put
+Caddy or another reverse proxy in front, or rebuild with different
+constants.
+
+---
+
+## D-74  Relay default body cap includes current max wire overhead
+
+Decision: the user-facing client plaintext cap remains 10 MiB, but the
+relay default `MaxBlobBytes` is now:
+
+```
+DefaultMaxPlaintextBytes + wire.PlainBodyE2EOverhead
+= 10,485,760 + 81
+= 10,485,841 bytes
+```
+
+`wire.PlainBodyE2EOverhead` is the largest currently-shipped plain-body
+wire expansion:
+
+- outer body envelope: version(1) + nonce(24) + AEAD tag(16) = 41 bytes
+- optional E2E content envelope: nonce(24) + AEAD tag(16) = 40 bytes
+
+Rationale: D-46 intended a 10 MiB file to be accepted by the default
+client and the default relay. With E2E default-on (D-71), a 10 MiB
+plaintext file produces a body larger than 10 MiB by up to 81 bytes.
+Keeping the relay cap at exactly 10 MiB makes the client-side size check
+look successful while the relay rejects the POST with 413.
+
+This corrects D-46 / D-50 / D-55 wording where those decisions treated
+"10 MiB client plaintext" and "10 MiB relay body" as interchangeable.
+They are no longer interchangeable in code or docs: the public file cap
+is 10 MiB plaintext; the default relay opaque-body cap includes current
+wire overhead.

@@ -3,7 +3,11 @@
 
 package wire
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/nmicic/deaddrop/internal/crypto"
+)
 
 // Wire body version bytes (PROTOCOL.md §12, SPEC_DRAFT_B_capsule.md §3).
 // 0x00 and 0xFF are reserved and MUST reject. 0x05+ is reserved for
@@ -16,6 +20,15 @@ const (
 	VersionBootLeg12 = 0x02
 	VersionBootLeg3  = 0x03
 	VersionPlainBE2E = 0x04
+)
+
+// Plain-body wire overhead constants. VersionPlainB bodies carry the outer
+// envelope only; VersionPlainBE2E bodies also carry the inner content-AEAD
+// nonce+tag. The relay is body-opaque, so its default body cap must budget
+// for the larger currently-shipped plain-body form.
+const (
+	PlainBodyOuterOverhead = 1 + crypto.NonceSize + crypto.TagSize
+	PlainBodyE2EOverhead   = PlainBodyOuterOverhead + crypto.NonceSize + crypto.TagSize
 )
 
 // Sentinel errors. ErrUnsupportedVersion names a version that is part

@@ -26,7 +26,7 @@ mkdir -p "$WORK"
 go build -trimpath -o "$WORK/deaddrop"       ./cmd/deaddrop
 go build -trimpath -o "$WORK/deaddrop-relay"  ./cmd/deaddrop-relay
 
-"$WORK/deaddrop-relay" --listen ":$PORT" --max-blob-bytes 11000000 --local-only >"$WORK/relay.log" 2>&1 &
+"$WORK/deaddrop-relay" --listen ":$PORT" --local-only >"$WORK/relay.log" 2>&1 &
 echo "$!" > "$WORK/relay.pid"
 sleep 1
 

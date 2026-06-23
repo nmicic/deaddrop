@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/nmicic/deaddrop/internal/capsule"
+	"github.com/nmicic/deaddrop/internal/relay"
 	"github.com/nmicic/deaddrop/internal/wire"
 )
 
@@ -755,6 +756,14 @@ func TestSend_FileTooLarge(t *testing.T) {
 	}
 	if !strings.Contains(stderr.String(), "file too large") {
 		t.Fatalf("stderr = %q, want \"file too large\"", stderr.String())
+	}
+}
+
+func TestSend_ClientCapFitsRelayDefault(t *testing.T) {
+	wireBodyLen := int64(maxBlobBytes + wire.PlainBodyE2EOverhead)
+	if wireBodyLen > relay.DefaultMaxBlobBytes {
+		t.Fatalf("client plaintext cap plus max wire overhead = %d, relay default cap = %d",
+			wireBodyLen, relay.DefaultMaxBlobBytes)
 	}
 }
 

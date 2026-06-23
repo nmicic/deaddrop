@@ -109,7 +109,11 @@ const (
 	defaultMaxConcurrentGets = 100
 	defaultMaxStoreBytes     = int64(512) * int64(relay.DefaultMaxBlobBytes)
 
-	shutdownTimeout = 2 * time.Second
+	shutdownTimeout          = 2 * time.Second
+	defaultReadHeaderTimeout = 5 * time.Second
+	defaultReadTimeout       = 30 * time.Second
+	defaultWriteTimeout      = 30 * time.Second
+	defaultIdleTimeout       = 60 * time.Second
 )
 
 const (
@@ -240,8 +244,12 @@ func run(args []string, stderr io.Writer, listen serverRunFn, sigCh <-chan os.Si
 	}
 
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: handler,
+		Addr:              addr,
+		Handler:           handler,
+		ReadHeaderTimeout: defaultReadHeaderTimeout,
+		ReadTimeout:       defaultReadTimeout,
+		WriteTimeout:      defaultWriteTimeout,
+		IdleTimeout:       defaultIdleTimeout,
 	}
 
 	gc := relay.NewGC(store, defaultGCInterval)

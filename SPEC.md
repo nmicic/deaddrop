@@ -89,7 +89,7 @@ decision and D-32 for age being rejected as the crypto core.
 | Component | Choice                                              | Reference       |
 |-----------|-----------------------------------------------------|-----------------|
 | Relay     | Go static binary behind caddy, in-memory mlocked store (D-39) | `BACKEND_VM.md` |
-| Blob cap  | 10 MiB default, operator-tunable                    | `BACKEND_VM.md` |
+| Blob cap  | 10 MiB plaintext default, operator-tunable          | `BACKEND_VM.md` |
 | One-shot  | Strict — single in-memory critical section for decrement + delete + stage body | `BACKEND_VM.md §3.2` |
 | Transport | TLS 1.2+ via caddy, optional operator-provisioned mTLS | `experimental/SPEC_DRAFT_D_private_CA.md` |
 

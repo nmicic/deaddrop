@@ -86,7 +86,7 @@ header -Server
 
 handle @api {
 	request_body {
-		max_size 10485760
+		max_size 10485841
 	}
 
 	uri strip_prefix /${PREFIX}

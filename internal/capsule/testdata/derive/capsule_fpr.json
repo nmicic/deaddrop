@@ -1,0 +1,25 @@
+{
+  "title": "capsule fingerprint derivation vectors",
+  "formula": "fingerprint = HKDF-SHA256(secret=PSK, salt=\"\", info=\"deaddrop-fingerprint-v2\" || pair_id(8), length=16)",
+  "spec_ref": "SPEC_DRAFT_B_capsule.md \u00a71.6 (fingerprint derivation, sole normative source)",
+  "cases": [
+    {
+      "name": "canonical",
+      "inputs": {
+        "PSK": "0202020202020202020202020202020202020202020202020202020202020202",
+        "pair_id": "0303030303030303"
+      },
+      "hkdf_info_hex": "6465616464726f702d66696e6765727072696e742d76320303030303030303",
+      "expected_hex": "9270616b0e781796d63600536027c541"
+    },
+    {
+      "name": "pair_id-last-byte-mutated",
+      "inputs": {
+        "PSK": "0202020202020202020202020202020202020202020202020202020202020202",
+        "pair_id": "03030303030303ff"
+      },
+      "hkdf_info_hex": "6465616464726f702d66696e6765727072696e742d763203030303030303ff",
+      "expected_hex": "972d88a0db1aa95e5312beece166238d"
+    }
+  ]
+}

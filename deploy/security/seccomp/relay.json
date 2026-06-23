@@ -1,0 +1,201 @@
+{
+  "_comment": "Seccomp allowlist for deaddrop-relay (static Go binary on scratch). ~55 syscalls vs Docker default ~300+. Everything not listed returns EPERM.",
+  "defaultAction": "SCMP_ACT_ERRNO",
+  "defaultErrnoRet": 1,
+  "architectures": [
+    "SCMP_ARCH_X86_64",
+    "SCMP_ARCH_AARCH64"
+  ],
+  "syscalls": [
+    {
+      "names": [
+        "read",
+        "write",
+        "close",
+        "fstat",
+        "newfstatat",
+        "lseek",
+        "mmap",
+        "mprotect",
+        "munmap",
+        "brk",
+        "mremap",
+        "madvise",
+        "mincore"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Core memory and file I/O — Go runtime"
+    },
+    {
+      "names": [
+        "rt_sigaction",
+        "rt_sigprocmask",
+        "rt_sigreturn",
+        "sigaltstack",
+        "tgkill"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Signal handling — Go runtime + graceful shutdown (SIGTERM/SIGINT)"
+    },
+    {
+      "names": [
+        "futex",
+        "clone",
+        "clone3",
+        "sched_yield",
+        "nanosleep",
+        "clock_nanosleep",
+        "clock_gettime",
+        "gettimeofday"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Goroutine scheduling, timers — Go runtime"
+    },
+    {
+      "names": [
+        "getpid",
+        "gettid",
+        "getuid",
+        "getgid",
+        "geteuid",
+        "getegid",
+        "getppid",
+        "kill"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Identity queries — Go runtime"
+    },
+    {
+      "names": [
+        "openat",
+        "fcntl",
+        "unlinkat",
+        "fchmod",
+        "fchmodat",
+        "statfs",
+        "getcwd"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "File operations — socket creation, chmod 0666, cleanup"
+    },
+    {
+      "names": [
+        "socket",
+        "bind",
+        "listen",
+        "accept4",
+        "getsockname",
+        "getpeername",
+        "getsockopt",
+        "setsockopt",
+        "shutdown"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Unix socket server — listen + accept connections"
+    },
+    {
+      "names": [
+        "epoll_create1",
+        "epoll_ctl",
+        "epoll_pwait",
+        "epoll_pwait2",
+        "eventfd2"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "I/O multiplexing — Go netpoller"
+    },
+    {
+      "names": [
+        "mlock",
+        "mlock2",
+        "mlockall"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Memory locking — D-39 secrets in RAM, requires CAP_IPC_LOCK"
+    },
+    {
+      "names": [
+        "prctl"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "PR_SET_DUMPABLE(0) — disable core dumps for secrets"
+    },
+    {
+      "names": [
+        "getrandom"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Cryptographic randomness — crypto/rand"
+    },
+    {
+      "names": [
+        "exit_group",
+        "exit"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Process exit"
+    },
+    {
+      "names": [
+        "set_robust_list",
+        "rseq",
+        "set_tid_address",
+        "execve"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Thread setup — runc init + Go runtime bootstrap"
+    },
+    {
+      "names": [
+        "readlinkat",
+        "pipe2"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Go runtime internals — /proc/self/exe readlink, signal pipe"
+    },
+    {
+      "names": [
+        "arch_prctl"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "x86_64 TLS/FS-base setup — Go runtime bootstrap"
+    },
+    {
+      "names": [
+        "fsopen",
+        "fsconfig",
+        "fsmount",
+        "fspick",
+        "move_mount",
+        "open_tree",
+        "fstatfs",
+        "close_range",
+        "openat2"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "runc 1.2+ container init — new mount API + fd cleanup"
+    },
+    {
+      "names": [
+        "capget",
+        "capset",
+        "chdir",
+        "getdents64",
+        "ioctl",
+        "mount",
+        "umount2",
+        "pivot_root",
+        "setgroups",
+        "setuid",
+        "setgid",
+        "statx",
+        "umask",
+        "unshare",
+        "prlimit64",
+        "sethostname"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "runc 1.2+ container init — namespace/user/mount setup before exec"
+    }
+  ]
+}

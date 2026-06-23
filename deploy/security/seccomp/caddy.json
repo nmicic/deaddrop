@@ -1,0 +1,207 @@
+{
+  "_comment": "Seccomp allowlist for Caddy (caddy:alpine). Broader than relay — Alpine userland + TLS/ACME cert management. ~95 syscalls vs Docker default ~300+.",
+  "defaultAction": "SCMP_ACT_ERRNO",
+  "defaultErrnoRet": 1,
+  "architectures": [
+    "SCMP_ARCH_X86_64",
+    "SCMP_ARCH_AARCH64"
+  ],
+  "syscalls": [
+    {
+      "names": [
+        "read",
+        "write",
+        "close",
+        "fstat",
+        "newfstatat",
+        "lseek",
+        "mmap",
+        "mprotect",
+        "munmap",
+        "brk",
+        "mremap",
+        "madvise",
+        "mincore",
+        "pread64",
+        "pwrite64",
+        "readv",
+        "writev"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Core memory and file I/O"
+    },
+    {
+      "names": [
+        "rt_sigaction",
+        "rt_sigprocmask",
+        "rt_sigreturn",
+        "sigaltstack",
+        "tgkill"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Signal handling"
+    },
+    {
+      "names": [
+        "futex",
+        "clone",
+        "clone3",
+        "sched_yield",
+        "nanosleep",
+        "clock_nanosleep",
+        "clock_gettime",
+        "gettimeofday"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Goroutine scheduling, timers — Go runtime"
+    },
+    {
+      "names": [
+        "getpid",
+        "gettid",
+        "getuid",
+        "getgid",
+        "geteuid",
+        "getegid",
+        "getppid",
+        "kill"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Identity queries + runc init parent signal"
+    },
+    {
+      "names": [
+        "openat",
+        "fcntl",
+        "fchmod",
+        "fchown",
+        "statfs",
+        "fstatfs",
+        "mkdirat",
+        "renameat",
+        "renameat2",
+        "unlinkat",
+        "readlinkat",
+        "faccessat2",
+        "ftruncate",
+        "getcwd",
+        "fsync",
+        "fdatasync"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "File operations — ACME cert storage, config reads"
+    },
+    {
+      "names": [
+        "socket",
+        "bind",
+        "listen",
+        "accept4",
+        "connect",
+        "getsockname",
+        "getpeername",
+        "getsockopt",
+        "setsockopt",
+        "shutdown",
+        "sendto",
+        "recvfrom",
+        "recvmsg",
+        "sendmsg"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Network — TLS listen + upstream Unix socket connect + ACME HTTP"
+    },
+    {
+      "names": [
+        "epoll_create1",
+        "epoll_ctl",
+        "epoll_pwait",
+        "epoll_pwait2",
+        "eventfd2"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "I/O multiplexing — Go netpoller"
+    },
+    {
+      "names": [
+        "getrandom"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "TLS randomness"
+    },
+    {
+      "names": [
+        "exit_group",
+        "exit",
+        "wait4"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Process exit + healthcheck child reap"
+    },
+    {
+      "names": [
+        "set_robust_list",
+        "rseq",
+        "set_tid_address",
+        "execve"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Thread setup + healthcheck exec (nc)"
+    },
+    {
+      "names": [
+        "pipe2",
+        "dup",
+        "dup2",
+        "dup3"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Pipe/fd ops — healthcheck, Go runtime"
+    },
+    {
+      "names": [
+        "prctl",
+        "arch_prctl",
+        "uname"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Process/arch setup"
+    },
+    {
+      "names": [
+        "fsopen",
+        "fsconfig",
+        "fsmount",
+        "fspick",
+        "move_mount",
+        "open_tree",
+        "close_range",
+        "openat2"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "runc 1.2+ container init — new mount API + fd cleanup"
+    },
+    {
+      "names": [
+        "capget",
+        "capset",
+        "chdir",
+        "getdents64",
+        "ioctl",
+        "mount",
+        "umount2",
+        "pivot_root",
+        "setgroups",
+        "setuid",
+        "setgid",
+        "statx",
+        "umask",
+        "unshare",
+        "prlimit64",
+        "sethostname"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "runc 1.2+ container init — namespace/user/mount setup before exec"
+    }
+  ]
+}

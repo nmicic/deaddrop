@@ -1,0 +1,22 @@
+/bin/
+/deaddrop
+/deaddrop-relay
+/cmd/deaddrop/deaddrop
+/cmd/deaddrop-relay/deaddrop-relay
+*.test
+*.out
+coverage.out
+.DS_Store
+/.idea
+/.vscode
+go.work
+go.work.sum
+.env
+docker-compose.security.yml
+deployment.yaml
+tools/test-derive/test-derive
+
+# local MCP wiring (carries test secrets) + venv
+/.mcp.json
+extra/mcp/.venv/
+extra/mcp/__pycache__/

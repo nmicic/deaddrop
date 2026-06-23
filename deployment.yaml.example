@@ -1,0 +1,23 @@
+# deployment.yaml.example — deployment target template for deaddrop.
+# Copy to deployment.yaml and fill in with real values.
+# deployment.yaml is gitignored (contains infrastructure details).
+#
+# Each target defines: host, TLS mode, site address, and env path.
+# Deploy with: ./scripts/deploy.sh <target>
+
+vps:
+  host: 1.2.3.4
+  user: root
+  domain: deaddrop.example.com
+  tls: acme
+  env_path: /etc/deaddrop/relay.env
+  deploy_dir: /root/deaddrop
+
+vm:
+  host: 192.168.122.254
+  user: root
+  tls: internal
+  deploy_dir: /root/deaddrop
+
+git:
+  github: "git@github.com:username/deaddrop.git"

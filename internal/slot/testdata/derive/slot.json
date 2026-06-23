@@ -1,0 +1,47 @@
+{
+  "title": "slot_id derivation vectors",
+  "formula": "slot_id = HMAC-SHA256(slot_key, \"slot\" || enc_u64_be(b) || enc_u32_be(attempt))[:16]",
+  "spec_ref": "PROTOCOL.md \u00a71 (URL structure); SPEC_DRAFT_B_capsule.md \u00a72 (slot_key derivation)",
+  "cases": [
+    {
+      "name": "attempt=0, b=30000000 (canonical current-minute)",
+      "inputs": {
+        "slot_key": "a3e97ca4d4b813bab5be9b57ca4b9d3c5990cf3a4848a11fcd36f296a59ab762",
+        "b": 30000000,
+        "attempt": 0
+      },
+      "hmac_input_hex": "736c6f740000000001c9c38000000000",
+      "expected_hex": "7f010cca7be46267194e1dac4a0f0297"
+    },
+    {
+      "name": "attempt=0, b=29999999 (previous minute)",
+      "inputs": {
+        "slot_key": "a3e97ca4d4b813bab5be9b57ca4b9d3c5990cf3a4848a11fcd36f296a59ab762",
+        "b": 29999999,
+        "attempt": 0
+      },
+      "hmac_input_hex": "736c6f740000000001c9c37f00000000",
+      "expected_hex": "f1e30123071537123209e7c50ee9c36d"
+    },
+    {
+      "name": "attempt=0, b=30000001 (next minute)",
+      "inputs": {
+        "slot_key": "a3e97ca4d4b813bab5be9b57ca4b9d3c5990cf3a4848a11fcd36f296a59ab762",
+        "b": 30000001,
+        "attempt": 0
+      },
+      "hmac_input_hex": "736c6f740000000001c9c38100000000",
+      "expected_hex": "3d94d7139147ee403aadfdb732bc11a4"
+    },
+    {
+      "name": "attempt=1, b=30000000 (retry \u2014 reserved field encoding test)",
+      "inputs": {
+        "slot_key": "a3e97ca4d4b813bab5be9b57ca4b9d3c5990cf3a4848a11fcd36f296a59ab762",
+        "b": 30000000,
+        "attempt": 1
+      },
+      "hmac_input_hex": "736c6f740000000001c9c38000000001",
+      "expected_hex": "8da6f12e878bb1270548abe7dfe2f580"
+    }
+  ]
+}

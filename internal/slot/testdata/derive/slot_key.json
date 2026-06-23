@@ -1,0 +1,16 @@
+{
+  "title": "slot_key derivation vectors",
+  "formula": "slot_key = HMAC-SHA256(PSK, \"slot-key-v1\" || pair_id(8))",
+  "spec_ref": "SPEC_DRAFT_B_capsule.md \u00a72 (key derivation)",
+  "cases": [
+    {
+      "name": "canonical",
+      "inputs": {
+        "PSK": "0202020202020202020202020202020202020202020202020202020202020202",
+        "pair_id": "0303030303030303"
+      },
+      "hmac_input_hex": "736c6f742d6b65792d76310303030303030303",
+      "expected_hex": "a3e97ca4d4b813bab5be9b57ca4b9d3c5990cf3a4848a11fcd36f296a59ab762"
+    }
+  ]
+}

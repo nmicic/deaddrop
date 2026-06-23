@@ -1,0 +1,104 @@
+# Copyright (c) 2026 Nenad Micic
+# SPDX-License-Identifier: Apache-2.0
+#
+# Full deaddrop stack: relay + Caddy reverse proxy.
+#
+# Network isolation:
+#   relay → internal only (no internet access)
+#   caddy → external (ports 80/443) + shared socket to relay
+#
+# Usage:
+#   cp .env.example .env   # edit with real secrets
+#   docker compose up -d --build
+#
+# The relay listens on a Unix socket inside a shared tmpfs volume.
+# Caddy terminates TLS and proxies matching paths to the relay.
+
+services:
+  relay:
+    build: .
+    container_name: deaddrop-relay
+    restart: unless-stopped
+    networks:
+      - internal
+    volumes:
+      - socket:/run/deaddrop
+    env_file: .env
+    command:
+      - "--listen"
+      - "unix:/run/deaddrop/app.sock"
+      - "--max-blob-bytes"
+      - "11000000"
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [IPC_LOCK]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:deploy/security/seccomp/relay.json
+    pids_limit: 100
+    cpus: 1.0
+    mem_limit: 512m
+    memswap_limit: 512m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  caddy:
+    image: caddy:alpine
+    container_name: deaddrop-caddy
+    restart: unless-stopped
+    depends_on:
+      - relay
+    networks:
+      - internal
+      - external
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - socket:/run/deaddrop:ro
+    environment:
+      - SITE_ADDR=${SITE_ADDR}
+      - CADDY_PREFIX=${CADDY_PREFIX}
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:deploy/security/seccomp/caddy.json
+    pids_limit: 100
+    cpus: 1.0
+    mem_limit: 256m
+    memswap_limit: 256m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "-w", "3", "localhost", "443"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+networks:
+  internal:
+    internal: true
+  external:
+
+volumes:
+  socket:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: "size=1m,mode=0755"
+  caddy_data:
+  caddy_config:

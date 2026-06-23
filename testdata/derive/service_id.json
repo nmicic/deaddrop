@@ -1,0 +1,34 @@
+{
+  "title": "service_id derivation vectors",
+  "formula": "service_id = HMAC-SHA256(DEPLOY_SECRET, \"svc\" || enc_u64_be(h))[:16]",
+  "spec_ref": "PROTOCOL.md \u00a71 (URL structure); SPEC.md \u00a7Two-level rolling URL",
+  "cases": [
+    {
+      "name": "canonical-h",
+      "inputs": {
+        "DEPLOY_SECRET": "0101010101010101010101010101010101010101010101010101010101010101",
+        "h": 500000
+      },
+      "hmac_input_hex": "737663000000000007a120",
+      "expected_hex": "7a78ba5bef18bfd32e35198ed3dc30b6"
+    },
+    {
+      "name": "h-minus-1 (previous hour, absorbs POST skew)",
+      "inputs": {
+        "DEPLOY_SECRET": "0101010101010101010101010101010101010101010101010101010101010101",
+        "h": 499999
+      },
+      "hmac_input_hex": "737663000000000007a11f",
+      "expected_hex": "497b7191d93f845b72102a0d8b09ecb4"
+    },
+    {
+      "name": "h-plus-1",
+      "inputs": {
+        "DEPLOY_SECRET": "0101010101010101010101010101010101010101010101010101010101010101",
+        "h": 500001
+      },
+      "hmac_input_hex": "737663000000000007a121",
+      "expected_hex": "e86ca2a995183d85c653d43fe19b2c02"
+    }
+  ]
+}

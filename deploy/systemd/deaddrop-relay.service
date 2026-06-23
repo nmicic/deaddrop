@@ -1,0 +1,74 @@
+[Unit]
+Description=DeadDrop relay — in-memory ephemeral slot server
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/deaddrop/relay.env
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/deaddrop/relay.env
+ExecStartPre=/bin/sh /usr/local/lib/deaddrop/preflight.sh
+# D-43: secrets are passed via env, not argv. The relay reads
+# $DEADDROP_DEPLOY_SECRET / $DEADDROP_WRITE_TOKEN from the
+# EnvironmentFile (legacy unprefixed $DEPLOY_SECRET / $WRITE_TOKEN
+# names are accepted with a deprecation WARN; rename in v0.2).
+ExecStart=/usr/local/bin/deaddrop-relay \
+    --listen unix:/run/deaddrop/app.sock
+
+# D-39: memory locking
+LimitMEMLOCK=infinity
+
+# D-39: no core dumps
+LimitCORE=0
+
+# D-40: read-only filesystem
+# RuntimeDirectory already grants write access to /run/deaddrop;
+# no explicit ReadWritePaths needed (satisfies D-40 "empty ReadWritePaths").
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+# D-40: no persistent data or log directories
+# MUST NOT add StateDirectory= or LogsDirectory= (D-40).
+
+# Hardening
+NoNewPrivileges=yes
+MemoryDenyWriteExecute=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+SystemCallArchitectures=native
+# CAP_IPC_LOCK: needed for mlockall (belt-and-suspenders with LimitMEMLOCK).
+# AmbientCapabilities grants it to the non-root deaddrop user.
+# Add CAP_NET_BIND_SERVICE only if listening on port < 1024.
+CapabilityBoundingSet=CAP_IPC_LOCK
+AmbientCapabilities=CAP_IPC_LOCK
+
+# Logging — stderr to journal only (D-40)
+# Pair with deploy/systemd/journald-deaddrop.conf (Storage=volatile)
+# to ensure logs never persist to disk.
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=deaddrop-relay
+
+# Resource limits
+# MemoryMax should be set per-deployment:
+# MemoryMax=6G  # MAX_STORE_BYTES + runtime overhead
+
+# Runtime directory for unix socket
+RuntimeDirectory=deaddrop
+RuntimeDirectoryMode=0750
+
+# Restart on failure
+Restart=on-failure
+RestartSec=5
+
+# Identity
+User=deaddrop
+Group=deaddrop
+
+[Install]
+WantedBy=multi-user.target

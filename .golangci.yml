@@ -1,0 +1,60 @@
+# Requires golangci-lint >= v1.64.x
+run:
+  timeout: 2m
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - ineffassign
+    - unused
+    - gosimple
+    - goimports
+    - depguard
+
+linters-settings:
+  depguard:
+    rules:
+      no-io-in-crypto-core:
+        files:
+          - "**/internal/crypto/**"
+          - "**/internal/capsule/**"
+          - "**/internal/slot/**"
+          - "**/internal/wire/**"
+        deny:
+          - pkg: "net"
+            desc: "C-5: crypto core must not import net"
+          - pkg: "net/*"
+            desc: "C-5: crypto core must not import net/*"
+          - pkg: "os"
+            desc: "C-5: crypto core must not import os"
+          - pkg: "os/*"
+            desc: "C-5: crypto core must not import os/*"
+          - pkg: "io/ioutil"
+            desc: "C-5: crypto core must not import io/ioutil"
+          - pkg: "time"
+            desc: "C-5: crypto core must not import time"
+          - pkg: "fmt"
+            desc: "C-5: crypto core must not import fmt (oracle-free posture)"
+          - pkg: "log"
+            desc: "C-5: crypto core must not import log"
+          - pkg: "log/slog"
+            desc: "C-5: crypto core must not import log/slog"
+          - pkg: "bufio"
+            desc: "C-5: crypto core must not import bufio"
+      no-time-in-crypto-core:
+        # C-4: crypto-core must not
+        # depend on time at all. Non-crypto internal/ packages
+        # (internal/relay, internal/client, ...) legitimately use
+        # time.Time and time.Duration for TTLs and handler timeouts.
+        # The underlying rule "no time.Now() outside internal/clock"
+        # is enforced by scripts/check_imports.sh and code checks.
+        files:
+          - "**/internal/crypto/**"
+          - "**/internal/capsule/**"
+          - "**/internal/slot/**"
+          - "**/internal/wire/**"
+        deny:
+          - pkg: "time"
+            desc: "C-4: crypto-core must not depend on time"

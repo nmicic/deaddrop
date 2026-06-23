@@ -1,0 +1,80 @@
+{
+  "title": "AD binding vectors (deaddrop-specific)",
+  "formula": "AD = service_id_bytes(16) || slot_id_bytes(16) || version(1)",
+  "spec_ref": "PROTOCOL.md \u00a77 (body format, AD layout); SPEC_DRAFT_B_capsule.md \u00a72 (aead_key derivation)",
+  "aead_key_derivation": "aead_key = HKDF-SHA256(secret=PSK, salt=slot_id_bytes(16), info=\"deaddrop-v1-B\" || pair_id(8) || service_id_bytes(16) || version(1), length=32)",
+  "note": "Nonce is 24 bytes of 0x05 (deterministic fixture, NOT for production use; nonce reuse across real encryptions is catastrophic)",
+  "algorithm": "XChaCha20-Poly1305 (IETF)",
+  "cases": [
+    {
+      "name": "canonical",
+      "inputs": {
+        "aead_key_hex": "9d64cde9176f319b9bd1e2aabde028bdb1410a5e91c3a07dd8bf7c249864e9f3",
+        "nonce_hex": "050505050505050505050505050505050505050505050505",
+        "aad_hex": "7a78ba5bef18bfd32e35198ed3dc30b67f010cca7be46267194e1dac4a0f029701",
+        "plaintext_hex": "6465616464726f7020706861736520302e322041442062696e64696e67207465737420766563746f720a"
+      },
+      "expected": {
+        "ciphertext_hex": "f61257249f12591d6885bdf6ea6eca44b1566d14b61461e83eb9c664c6cb73a0b5f91743c361c104389f",
+        "tag_hex": "1b842d076dd81c9aaecc3d3e8674e2f7",
+        "decrypt_ok": true
+      }
+    },
+    {
+      "name": "service_id-bit0-flipped",
+      "inputs": {
+        "aead_key_hex": "9d64cde9176f319b9bd1e2aabde028bdb1410a5e91c3a07dd8bf7c249864e9f3",
+        "nonce_hex": "050505050505050505050505050505050505050505050505",
+        "aad_hex": "7b78ba5bef18bfd32e35198ed3dc30b67f010cca7be46267194e1dac4a0f029701",
+        "ciphertext_hex": "f61257249f12591d6885bdf6ea6eca44b1566d14b61461e83eb9c664c6cb73a0b5f91743c361c104389f",
+        "tag_hex": "1b842d076dd81c9aaecc3d3e8674e2f7"
+      },
+      "expected": {
+        "decrypt_ok": false,
+        "failure_reason": "AEAD tag invalid"
+      }
+    },
+    {
+      "name": "slot_id-bit0-flipped",
+      "inputs": {
+        "aead_key_hex": "9d64cde9176f319b9bd1e2aabde028bdb1410a5e91c3a07dd8bf7c249864e9f3",
+        "nonce_hex": "050505050505050505050505050505050505050505050505",
+        "aad_hex": "7a78ba5bef18bfd32e35198ed3dc30b67e010cca7be46267194e1dac4a0f029701",
+        "ciphertext_hex": "f61257249f12591d6885bdf6ea6eca44b1566d14b61461e83eb9c664c6cb73a0b5f91743c361c104389f",
+        "tag_hex": "1b842d076dd81c9aaecc3d3e8674e2f7"
+      },
+      "expected": {
+        "decrypt_ok": false,
+        "failure_reason": "AEAD tag invalid"
+      }
+    },
+    {
+      "name": "version-flipped",
+      "inputs": {
+        "aead_key_hex": "9d64cde9176f319b9bd1e2aabde028bdb1410a5e91c3a07dd8bf7c249864e9f3",
+        "nonce_hex": "050505050505050505050505050505050505050505050505",
+        "aad_hex": "7a78ba5bef18bfd32e35198ed3dc30b67f010cca7be46267194e1dac4a0f029700",
+        "ciphertext_hex": "f61257249f12591d6885bdf6ea6eca44b1566d14b61461e83eb9c664c6cb73a0b5f91743c361c104389f",
+        "tag_hex": "1b842d076dd81c9aaecc3d3e8674e2f7"
+      },
+      "expected": {
+        "decrypt_ok": false,
+        "failure_reason": "AEAD tag invalid"
+      }
+    },
+    {
+      "name": "trailing-byte-appended",
+      "inputs": {
+        "aead_key_hex": "9d64cde9176f319b9bd1e2aabde028bdb1410a5e91c3a07dd8bf7c249864e9f3",
+        "nonce_hex": "050505050505050505050505050505050505050505050505",
+        "aad_hex": "7a78ba5bef18bfd32e35198ed3dc30b67f010cca7be46267194e1dac4a0f02970100",
+        "ciphertext_hex": "f61257249f12591d6885bdf6ea6eca44b1566d14b61461e83eb9c664c6cb73a0b5f91743c361c104389f",
+        "tag_hex": "1b842d076dd81c9aaecc3d3e8674e2f7"
+      },
+      "expected": {
+        "decrypt_ok": false,
+        "failure_reason": "AEAD tag invalid"
+      }
+    }
+  ]
+}

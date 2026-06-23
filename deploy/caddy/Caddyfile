@@ -1,0 +1,37 @@
+# Copyright (c) 2026 Nenad Micic
+# SPDX-License-Identifier: Apache-2.0
+#
+# Production Caddyfile for deaddrop relay.
+# Requires environment variables:
+#   SITE_ADDR     — site address (e.g. deaddrop.example.com)
+#   CADDY_PREFIX  — secret URL prefix for the relay API
+
+{$SITE_ADDR}
+
+log {
+	output discard
+}
+
+header -Server
+
+@api path_regexp ^/{$CADDY_PREFIX}/[0-9a-f]{32}/[0-9a-f]{32}$
+
+handle @api {
+	request_body {
+		max_size 11000000
+	}
+
+	uri strip_prefix /{$CADDY_PREFIX}
+
+	reverse_proxy unix//run/deaddrop/app.sock {
+		header_up -X-Forwarded-For
+		header_up -X-Real-IP
+		header_up -X-Client-IP
+		header_up -Forwarded
+		header_up X-DeadDrop-Client-IP {http.request.remote.host}
+	}
+}
+
+handle {
+	respond 404
+}

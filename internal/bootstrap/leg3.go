@@ -96,11 +96,6 @@ func finishDeriveBodyKey(dhEph []byte, errEph error, dhStatic []byte, errStatic 
 	return crypto.DeriveKey(ikm, nil, info, 32)
 }
 
-// isAllZero is a deprecated package-private alias for
-// crypto.IsAllZero, retained so any in-package callers continue to
-// compile. New code MUST use crypto.IsAllZero (D-66).
-func isAllZero(b []byte) bool { return crypto.IsAllZero(b) }
-
 func leg3AD(serviceID, leg3SlotID []byte, ephPK [32]byte) []byte {
 	ad := make([]byte, 0, 69)
 	ad = append(ad, serviceID...)

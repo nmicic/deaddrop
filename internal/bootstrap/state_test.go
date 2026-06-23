@@ -128,7 +128,9 @@ func TestIsLowOrderPoint_Order8Verification(t *testing.T) {
 				var scalar, dst [32]byte
 				scalar[3] = byte(s + 1)
 				scalar[1] = byte(idx + 1)
-				curve25519.ScalarMult(&dst, &scalar, &variant)
+				// Intentionally uses ScalarMult (not X25519): this test asserts the
+				// low-order-point all-zeroes behavior that ScalarMult exhibits.
+				curve25519.ScalarMult(&dst, &scalar, &variant) //nolint:staticcheck // SA1019: low-order zeroing is the property under test
 				if dst != ([32]byte{}) {
 					t.Errorf("order-8 point %d variant %x: X25519 result not zero for scalar %d", idx, variant[31], s)
 				}

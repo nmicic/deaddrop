@@ -90,7 +90,7 @@ func TestWriteCapsule_BadPath(t *testing.T) {
 	if err := os.Chmod(dir, 0500); err != nil {
 		t.Fatal(err)
 	}
-	defer os.Chmod(dir, 0700)
+	defer func() { _ = os.Chmod(dir, 0700) }()
 
 	path := dir + "/capsule"
 	err := WriteCapsule(path, psk, pairID, pass)

@@ -311,7 +311,7 @@ func TestOpenLeg12_Fuzz10k(t *testing.T) {
 	for i := 0; i < 10_000; i++ {
 		n := i % 201
 		buf := make([]byte, n)
-		rand.Read(buf)
+		_, _ = rand.Read(buf)
 		_, err := OpenLeg12(legKey, serviceID, slotID, DirInitiatorToResponder, buf)
 		if err == nil {
 			t.Fatalf("iteration %d: expected error for random input of length %d", i, n)

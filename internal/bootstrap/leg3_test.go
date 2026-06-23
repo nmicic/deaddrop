@@ -556,7 +556,7 @@ func TestOpenLeg3_Fuzz10k(t *testing.T) {
 	for i := 0; i < 10_000; i++ {
 		n := i % 201
 		buf := make([]byte, n)
-		rand.Read(buf)
+		_, _ = rand.Read(buf)
 		_, _, err := OpenLeg3(bodyKey, serviceID, slotID, k.ephPK, buf)
 		if err == nil {
 			t.Fatalf("iteration %d: expected error for random input of length %d", i, n)

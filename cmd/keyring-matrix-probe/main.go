@@ -181,7 +181,7 @@ func init() {
 	}
 	var pairID [8]byte
 	for i := 0; i < 8; i++ {
-		fmt.Sscanf(pairHex[i*2:i*2+2], "%02x", &pairID[i])
+		_, _ = fmt.Sscanf(pairHex[i*2:i*2+2], "%02x", &pairID[i])
 	}
 	_, err = store.Get(pairID)
 	if err != nil {

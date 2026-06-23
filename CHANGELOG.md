@@ -3,7 +3,43 @@
 
 # Changelog
 
-## Unreleased
+## v1.0.3 (2026-06-24)
+
+CI / build-tag fix. No protocol, wire, or runtime-behavior changes;
+v1.0.x binaries and capsules are unaffected.
+
+### Fixed
+
+- macOS build under `CGO_ENABLED=0` no longer fails with
+  `undefined: identitystore.New` (and the same for `passcache`). The
+  Keychain backends call `Security.framework` via cgo and are dropped
+  when cgo is disabled, leaving no `New()`. Added `darwin && !cgo`
+  stubs that return `ErrUnsupported` — mirroring the existing
+  unsupported-platform stubs — so `go vet` / `make lint` / `make build`
+  pass on the macOS CI lane. A functional macOS Keychain backend still
+  requires `CGO_ENABLED=1` (HOWTO.md §1).
+
+---
+
+## v1.0.2 (2026-06-24)
+
+CI / tooling fix. No protocol, wire, or runtime-behavior changes.
+
+### Fixed
+
+- CI: `make lint-install` now runs before `make doctor`, which had
+  failed on missing `golangci-lint` / `staticcheck`.
+- CI: `setup-go` pinned to `1.25.x` to match `go.mod` (`go 1.25.0`);
+  `1.22.x` cannot build the module.
+- CI: pinned `actions/checkout@v5.0.0` and `actions/setup-go@v6.4.0`
+  (Node 24) to clear the Node 20 runner deprecation.
+- Fixed pre-existing lint findings (`errcheck` on `fmt.Sscanf` /
+  `rand.Read` / `os.Chmod`, an unused alias, and an `SA1019` on an
+  intentional `curve25519.ScalarMult` low-order-point test).
+
+---
+
+## v1.0.1 (2026-06-24)
 
 ### Fixed
 
@@ -11,6 +47,12 @@
   for direct internet-facing deployments.
 - Default relay body cap now admits the documented 10 MiB plaintext file
   limit plus the currently-shipped max wire overhead.
+
+---
+
+## v1.0.0 (2026-06-24)
+
+- Initial public release.
 
 ---
 

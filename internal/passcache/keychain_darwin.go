@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Nenad Mićić
 // SPDX-License-Identifier: Apache-2.0
 
-//go:build darwin
+//go:build darwin && cgo
 
 package passcache
 

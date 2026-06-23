@@ -18,6 +18,11 @@ v1.0.x binaries and capsules are unaffected.
   unsupported-platform stubs — so `go vet` / `make lint` / `make build`
   pass on the macOS CI lane. A functional macOS Keychain backend still
   requires `CGO_ENABLED=1` (HOWTO.md §1).
+- `identitystore`: moved the package-private `zeroize` helper into a
+  `linux || (darwin && cgo)` build-tagged file. It is only called by
+  the keyutils and Keychain backends, so once the `darwin && !cgo`
+  stub build started compiling it tripped the `unused` linter on the
+  macOS CI lane.
 
 ---
 

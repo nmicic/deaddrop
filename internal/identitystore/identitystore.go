@@ -126,11 +126,3 @@ func UnmarshalEntry(blob []byte) (*Entry, error) {
 	copy(e.PeerPK[:], blob[65:97])
 	return e, nil
 }
-
-// zeroize clears b in place. Keep it package-private; backend files
-// share the helper.
-func zeroize(b []byte) {
-	for i := range b {
-		b[i] = 0
-	}
-}
